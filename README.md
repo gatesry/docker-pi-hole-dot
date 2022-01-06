@@ -69,9 +69,9 @@ pihole:
 container_name: pihole
 build:
     args:
-    PIHOLE_VERSION: 2022.01.1
-    FTL_VERSION: v5.12.1
-    TARGET_ARCH: amd64
+        PIHOLE_VERSION: 2022.01.1
+        FTL_VERSION: v5.12.1
+        TARGET_ARCH: amd64
     context: src/pihole-dot
 cap_add:
     - NET_ADMIN
