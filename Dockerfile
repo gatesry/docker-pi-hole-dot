@@ -1,20 +1,12 @@
-FROM pihole/pihole:latest
-ARG TARGETARCH
-ARG DEBIAN_FRONTEND="noninteractive"
-ARG FTLVER=v5.11
+ARG FTL_VERSION
+ARG PIHOLE_VERSION
+ARG TARGET_ARCH
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install unbound unbound-anchor unbound-host dns-root-data wget curl jq
+FROM pihole/pihole:${PIHOLE_VERSION}
+
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install unbound unbound-anchor unbound-host dns-root-data
 COPY etc/ /etc/
-
-#USE upstream ugrade method #Define versions en etc/pi-hole-versions 
-#RUN rm -R /usr/local/bin/whiptail /usr/local/bin/service /etc/.pihole /var/www/html/admin
-#ENV PIHOLE_INSTALL /etc/.pihole/automated\ install/basic-install.sh
-#ENV S6_OVERLAY_VERSION v2.1.0.2
-#RUN bash -ex install.sh 2>&1 && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
-
 COPY update-ftl /usr/sbin/
-RUN /usr/sbin/update-ftl $TARGETARCH
-
+RUN /usr/sbin/update-ftl ${TARGET_ARCH} ${FTL_VERSION}
 RUN chown -R root:unbound /etc/unbound && chmod 640 /etc/unbound/unbound.conf.d/* /etc/unbound/zones/*
 RUN unbound-anchor -v || unbound-anchor -v
-

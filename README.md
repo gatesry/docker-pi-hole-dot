@@ -18,18 +18,6 @@
 
 The unbound daemon runs in 0.0.0.0#5353 and Pi Hole can use it as upstream DNS.
 
-## Multi-platform image 👪
-
-Access to the multi-platform docker [image](https://hub.docker.com/r/juampe/pihole-dot).
-
-Supported platforms:
-
-* linux/amd64
-* linux/arm/v7
-* linux/arm64/v8
-
-Access to the git [repository](https://github.com/juampe/docker-pi-hole-dot.git)
-
 ## Workflow scheme
 
 👀`Local Client > (Local Clear DNS) -> Pi-hole > (Host Internal Clear DNS) -> Unbound > (Internet DoT) -> DoT DNS provider`
@@ -72,24 +60,56 @@ The enhancement is the the unbound daemon configured to use DNS over TLS (DoT)
 
 ☝️To use the local unbound daemon DoT DNS upstream server, it can be defined by **DNS1=127.0.01#5353** and **DNS2=no** environment variables
 
-## Docker run test example
+## Docker Compose
 
-💪In this example is used **DOT_UPSTREAM**, **DNS1** and **DNS2** environment variables
+💪In this example is used **DOT_UPSTREAM** and **DNS1** environment variables
 
 ```bash
-docker run --init -d --restart=always --network=eraser --dns 127.0.0.1 --ip 192.168.0.2 -e ServerIP="192.168.0.2" --hostname pihole -e VIRTUAL_HOST="pihole" --name="pihole" -e "WEBPASSWORD=admin" -e "TZ=Europe/Madrid" -e "DOT_UPSTREAM=1.1.1.1,1.0.0.1" -e "DNS1=127.0.0.1#5353" -e "DNS2=no" --cap-add=NET_ADMIN --cap-add=SYS_NICE -v /opt/docker/pihole/dnsmasq.d:/etc/dnsmasq.d/ -v /opt/docker/pihole/pihole:/etc/pihole juampe/pihole-dot
+pihole:
+container_name: pihole
+build:
+    args:
+    PIHOLE_VERSION: 2022.01.1
+    FTL_VERSION: v5.12.1
+    TARGET_ARCH: amd64
+    context: src/pihole-dot
+cap_add:
+    - NET_ADMIN
+    - SYS_NICE
+dns:
+    - 1.1.1.1
+    - 1.0.0.1
+environment:
+    DNS1: '127.0.0.1#5353'
+    DOT_UPSTREAM: 'cloudflare'
+    TZ: 'America/New_York'
+hostname: pihole
+labels:
+    - com.centurylinklabs.watchtower.enable=false
+expose:
+    - '443'
+ports:
+    - '53:53/tcp'
+    - '53:53/udp'
+volumes:
+    - /opt/docker/data/pihole/dnsmasq.d:/etc/dnsmasq.d
+    - /opt/docker/data/pihole/lighttpd/external.conf:/etc/lighttpd/external.conf
+    - /opt/docker/data/pihole/pihole:/etc/pihole
+    - /opt/docker/data/pihole/unbound.conf.d/dns-rebinding.conf:/etc/unbound/unbound.conf.d/dns-rebinding.conf
+restart: unless-stopped
 ```
 
 ## How to build 👷
 
 ```bash
 git clone https://github.com/juampe/docker-pi-hole-dot.git
-docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag juampe/pihole-dot:latest .
+
+<Add to docker-compose.yml>
+
+docker-compose build
+docker-compose up -d
 ```
 
 ## Thanks
 
-🙏Thanks to <https://github.com/pi-hole/docker-pi-hole>
-
-🙏Thanks to <https://github.com/stafwag/docker-stafwag-unbound>
-
+🙏 Thanks to <https://github.com/juampe/docker-pi-hole-dot>

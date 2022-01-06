@@ -1,9 +1,8 @@
 #!/bin/bash
 ARCH=$1
-source /etc/pi-hole-versions
-
-URLBASE="https://github.com/pi-hole/FTL/releases/download/$FTL_VERSION"
-echo "Update FTL to $FTL_VERSION"
+RELEASE=$2
+URLBASE="https://github.com/pi-hole/FTL/releases/download/$RELEASE"
+echo "Update FTL to $ARCH-$RELEASE"
 case $ARCH in
 	arm)
 		URL="$URLBASE/pihole-FTL-armv7-linux-gnueabihf"
@@ -17,5 +16,5 @@ case $ARCH in
 esac
 echo "URL $URL"
 
-wget "$URL" -q -O /usr/bin/pihole-FTL
+curl -sLo /usr/bin/pihole-FTL "$URL"
 chmod 755 /usr/bin/pihole-FTL
